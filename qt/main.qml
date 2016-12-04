@@ -3,14 +3,16 @@ import QtQuick.Window 2.1
 import CameraPlayer 1.0
 
 Rectangle {
-    width: Math.min(Screen.width, 400)
-	height: Math.min(Screen.height, 256)
-	color: "black"
+    width: Math.min(Screen.width, 640)
+    height: Math.min(Screen.height, 480)
+    color: "transparent"
 
 	CameraPlayer {
 		id: camera
-		width: 360
-		height: 240
+        width: 640
+        height: 480
+        x: 100
+        y: 100
         play: true
 	}
 
