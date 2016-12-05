@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
 
     QQuickView viewer;
     viewer.setSource(QUrl("qrc:///main.qml"));
-    //viewer.show();
-    viewer.showFullScreen();
+    viewer.show();
+    //viewer.showFullScreen();
     return app.exec();
 }

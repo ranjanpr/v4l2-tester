@@ -14,6 +14,7 @@
 CameraPlayer::CameraPlayer(QQuickItem *parent)
     : QQuickItem(parent), mPlay(false), mBoundChanged(true), mTextureChanged(true)
 {
+    qDebug()<<"CameraPlayer::CameraPlayer";
 	setFlag(ItemHasContents, true);
 	connect(this, &CameraPlayer::xChanged, this, &CameraPlayer::boundChanged);
 	connect(this, &CameraPlayer::yChanged, this, &CameraPlayer::boundChanged);
@@ -35,11 +36,12 @@ CameraPlayer::CameraPlayer(QQuickItem *parent)
 
 CameraPlayer::~CameraPlayer()
 {
-
+    qDebug()<<"CameraPlayer::~CameraPlayer";
 }
 
 void CameraPlayer::setPlay(bool value)
 {
+    qDebug()<<"CameraPlayer::setPlay";
 	if (mPlay == value)
 		return;
 
@@ -60,12 +62,14 @@ void CameraPlayer::boundChanged()
 
 void CameraPlayer::textureChanged()
 {
+    qDebug()<<"CameraPlayer::textureChanged";
 	mTextureChanged = true;
 	update();
 }
 
 QSGNode *CameraPlayer::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
 {
+    qDebug()<<"CameraPlayer::updatePaintNode";
 	QSGGeometryNode *node;
 
     if (!oldNode)

@@ -1,20 +1,36 @@
 #include "imagestream.h"
+#include <QDebug>
 
 ImageStream::ImageStream(int width, int height)
     : front_index(0), updated(false), m_width(width), m_height(height)
 {
+    qDebug()<<"ImageStream::ImageStream";
     for (int i = 0; i < 2; i++)
 		data[i] = new uchar[width * height * 3];
 }
 
 ImageStream::~ImageStream()
 {
+    qDebug()<<"ImageStream::~ImageStream";
     for (int i = 0; i < 2; i++)
 		delete data[i];
 }
 
+uchar *ImageStream::getFrontImage()
+{
+    qDebug()<<"ImageStream::getFrontImage";
+    return data[front_index];
+}
+
+uchar *ImageStream::getBackImage()
+{
+    qDebug()<<"ImageStream::getBackImage";
+    return data[(front_index + 1) % 2];
+}
+
 void ImageStream::yuv2rgb(const uchar *yuv, int yw, int yh)
 {
+    qDebug()<<"ImageStream::yuv2rgb";
     int i, j;
     int w = m_width, h = m_height;
 	uchar *rgb = getBackImage();
@@ -30,6 +46,7 @@ void ImageStream::yuv2rgb(const uchar *yuv, int yw, int yh)
 
 void ImageStream::yuyv2rgb(const uchar *yuv, int yw, int yh)
 {
+    qDebug()<<"ImageStream::yuyv2rgb";
     uchar *rgb = getBackImage();
 
     for (int i = 0; i < yw * yh; i++) {
@@ -41,6 +58,7 @@ void ImageStream::yuyv2rgb(const uchar *yuv, int yw, int yh)
 
 void ImageStream::uyvy2rgb(const uchar *yuv, int yw, int yh)
 {
+    qDebug()<<"ImageStream::uyvy2rgb";
     uchar *rgb = getBackImage();
 
     for (int i = 0; i < yw * yh; i++) {
@@ -52,8 +70,21 @@ void ImageStream::uyvy2rgb(const uchar *yuv, int yw, int yh)
 
 void ImageStream::swapImage()
 {
+    qDebug()<<"ImageStream::swapImage";
     mutex.lock();
     front_index = (front_index + 1) % 2;
     updated = 4;
     mutex.unlock();
 }
+
+bool ImageStream::isUpdated() { return updated; }
+
+void ImageStream::decUpdated() { updated--; }
+
+void ImageStream::lockFrontImage() { mutex.lock(); }
+
+void ImageStream::unlockFrontImage() { mutex.unlock(); }
+
+int ImageStream::getWidth() { return m_width; }
+
+int ImageStream::getHeight() { return m_height; }

@@ -20,11 +20,13 @@ Camera::Camera(QObject *parent)
       frame_count(0), frame_devisor(1), m_running(false),
       m_node(0)
 {
+    qDebug()<<"Camera::Camera";
     videodev.fd = -1;
 }
 
 Camera::~Camera()
 {
+    qDebug()<<"Camera::~Camera";
     closeCapture();
 
     if (m_texture)
@@ -35,6 +37,8 @@ Camera::~Camera()
 
 QSGGeometryNode *Camera::createNode()
 {
+    qDebug()<<"Camera::createNode";
+
     QSGGeometry *geometry;
 
     if (!m_texture)
@@ -58,6 +62,8 @@ QSGGeometryNode *Camera::createNode()
 
 void Camera::updateGeometry(qreal x, qreal y, qreal width, qreal height)
 {
+    qDebug()<<"Camera::updateGeometry";
+
     QSGGeometry::TexturedPoint2D *vertices = m_node->geometry()->vertexDataAsTexturedPoint2D();
 
     vertices[0].x = x;
@@ -83,17 +89,23 @@ void Camera::updateGeometry(qreal x, qreal y, qreal width, qreal height)
 
 void Camera::startStream()
 {
+    qDebug()<<"Camera::startStream";
+
     m_running = true;
     m_wait.wakeAll();
 }
 
 void Camera::stopStream()
 {
+    qDebug()<<"Camera::stopStream";
+
     m_running = false;
 }
 
 void Camera::run()
 {
+    qDebug()<<"Camera::run";
+
     if (initCapture() < 0)
         return;
 
@@ -111,6 +123,8 @@ void Camera::run()
 
 void Camera::textureProcess(const uchar *data, int width, int height)
 {
+    qDebug()<<"Camera::textureProcess";
+
     Q_UNUSED(data);
     Q_UNUSED(width);
     Q_UNUSED(height);
@@ -118,6 +132,8 @@ void Camera::textureProcess(const uchar *data, int width, int height)
 
 void Camera::updateTexture(const uchar *data, int width, int height)
 {
+    qDebug()<<"Camera::updateTexture";
+
     if (!m_running)
         return;
 
@@ -128,11 +144,20 @@ void Camera::updateTexture(const uchar *data, int width, int height)
 
 void Camera::updateMaterial()
 {
-    m_texture->updateFrame(m_image->getFrontImage());
-}
+    qDebug()<<"Camera::updateMaterial";
 
+    if(m_texture)
+    {
+        m_texture->updateFrame(m_image->getFrontImage());
+    }
+    else
+    {
+        qDebug()<<"Camera::updateMaterial m_texture NULL";
+    }
+}
 void Camera::vidioc_enuminput(int fd)
 {
+    qDebug()<<"Camera::vidioc_enuminput";
     int err;
     struct v4l2_input input;
     memset(&input, 0, sizeof(input));
@@ -148,6 +173,7 @@ void Camera::vidioc_enuminput(int fd)
 
 int Camera::initCapture()
 {
+    qDebug()<<"Camera::initCapture";
     if (videodev.fd > 0)
         return 0;
 
@@ -229,6 +255,7 @@ err1:
 
 int Camera::startCapture()
 {
+    qDebug()<<"Camera::startCapture";
     int a, ret;
 
     /* Start Streaming. on capture device */
@@ -245,6 +272,7 @@ int Camera::startCapture()
 
 int Camera::captureFrame()
 {
+    qDebug()<<"Camera::captureFrame";
     int ret;
     struct v4l2_buffer buf;
 
@@ -260,8 +288,24 @@ int Camera::captureFrame()
     }
 
     if (frame_count++ % frame_devisor == 0)
-        updateTexture((uchar *)videodev.buff_info[buf.index].start, videodev.cap_width, videodev.cap_height);
+    {
+        int outfd = open("out.img", O_RDWR|O_CREAT);
+        if(outfd<0)
+        {
+            qDebug()<<"OUT image error";
+        }
 
+        write(outfd, videodev.buff_info[buf.index].start, buf.bytesused);
+        close(outfd);
+
+        qDebug()<<"OUT IMAGE DONE";
+
+        exit(0);
+//        updateTexture(
+//                (uchar *)videodev.buff_info[buf.index].start,
+//                videodev.cap_width,
+//                videodev.cap_height);
+    }
     ret = ioctl(videodev.fd, VIDIOC_QBUF, &buf);
     if (ret < 0) {
         qDebug() << "Cap VIDIOC_QBUF";
@@ -273,6 +317,7 @@ int Camera::captureFrame()
 
 int Camera::stopCapture()
 {
+    qDebug()<<"Camera::stopCapture";
     int a, ret;
 
     qDebug() << "Stream off!!\n";
@@ -289,6 +334,7 @@ int Camera::stopCapture()
 
 void Camera::closeCapture()
 {
+    qDebug()<<"Camera::closeCapture";
     int i;
     struct buf_info *buff_info;
 

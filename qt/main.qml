@@ -11,8 +11,8 @@ Rectangle {
 		id: camera
         width: 640
         height: 480
-        x: 100
-        y: 100
+        x: 0
+        y: 0
         play: true
 	}
 

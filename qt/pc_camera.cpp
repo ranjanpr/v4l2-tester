@@ -9,14 +9,16 @@
 PCCamera::PCCamera(QObject *parent)
     : Camera(parent)
 {
+    qDebug()<<"PCCamera::PCCamera";
     CAPTURE_DEVICE = "/dev/video0";
     m_image = new ImageStream(640, 480);
 }
 
 int PCCamera::subInitCapture()
 {
+    qDebug()<<"PCCamera::subInitCapture";
     int err, fd = videodev.fd;
-
+#if 0
     struct v4l2_dbg_chip_info chip;
     if ((err = ioctl(fd, VIDIOC_DBG_G_CHIP_INFO, &chip)) < 0)
         qWarning() << "VIDIOC_DBG_G_CHIP_INFO error " << errno;
@@ -31,8 +33,11 @@ int PCCamera::subInitCapture()
     support_fmt = false;
     while ((err = ioctl(fd, VIDIOC_ENUM_FMT, &ffmt)) == 0) {
         qDebug() << "fmt" << ffmt.pixelformat << (char *)ffmt.description;
-        if (ffmt.pixelformat == V4L2_PIX_FMT_YUYV)
+        if (ffmt.pixelformat == 8200)//V4L2_PIX_FMT_NV12)//V4L2_PIX_FMT_YUYV)
+        {
+            qDebug()<<"fmt nv12 supported true";
             support_fmt = true;
+        }
         ffmt.index++;
     }
     if (!support_fmt) {
@@ -44,7 +49,7 @@ int PCCamera::subInitCapture()
     struct v4l2_frmsizeenum fsize;
     memset(&fsize, 0, sizeof(fsize));
     fsize.index = 0;
-    fsize.pixel_format = V4L2_PIX_FMT_YUYV;
+    fsize.pixel_format = 8200;//V4L2_PIX_FMT_YUYV;
     support_640x480 = false;
     while ((err = ioctl(fd, VIDIOC_ENUM_FRAMESIZES, &fsize)) == 0) {
         qDebug() << "frame size " << fsize.discrete.width << fsize.discrete.height;
@@ -64,20 +69,24 @@ int PCCamera::subInitCapture()
         qWarning() << "VIDIOC_G_INPUT fail" << errno;
     else
         qDebug() << "current input index =" << index;
-
+#endif
     struct v4l2_format fmt;
     memset(&fmt, 0, sizeof(fmt));
     fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+
+#if 0
     if ((err = ioctl(fd, VIDIOC_G_FMT, &fmt)) < 0)
         qWarning() << "VIDIOC_G_FMT fail" << errno;
     else
         qDebug() << "fmt width =" << fmt.fmt.pix.width
                  << " height =" << fmt.fmt.pix.height
                  << " pfmt =" << fmt.fmt.pix.pixelformat;
-
+#endif
     fmt.fmt.pix.width = 640;
     fmt.fmt.pix.height = 480;
-    fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
+    fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_NV12;//V4L2_PIX_FMT_SGRBG10;
+    fmt.fmt.pix.field = V4L2_FIELD_NONE;
+
     if ((err = ioctl(fd, VIDIOC_S_FMT, &fmt)) < 0)
         qWarning() << "VIDIOC_S_FMT fail" << errno;
     else
@@ -91,9 +100,9 @@ int PCCamera::subInitCapture()
         qDebug() << "fmt width =" << fmt.fmt.pix.width
                  << " height =" << fmt.fmt.pix.height
                  << " pfmt =" << fmt.fmt.pix.pixelformat;
-    Q_ASSERT(fmt.fmt.pix.width == 640);
-    Q_ASSERT(fmt.fmt.pix.height == 480);
-    Q_ASSERT(fmt.fmt.pix.pixelformat == V4L2_PIX_FMT_YUYV);
+//    Q_ASSERT(fmt.fmt.pix.width == 640);
+//    Q_ASSERT(fmt.fmt.pix.height == 480);
+//    Q_ASSERT(fmt.fmt.pix.pixelformat == 8200);//V4L2_PIX_FMT_NV12);//V4L2_PIX_FMT_YUYV);
 
     videodev.cap_width = fmt.fmt.pix.width;
     videodev.cap_height = fmt.fmt.pix.height;
@@ -103,5 +112,6 @@ int PCCamera::subInitCapture()
 
 void PCCamera::textureProcess(const uchar *data, int width, int height)
 {
+    qDebug()<<"PCCamera::textureProcess";
     m_image->yuyv2rgb(data, width, height);
 }

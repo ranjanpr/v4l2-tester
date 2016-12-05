@@ -1,8 +1,9 @@
 #include "camera_texture.h"
-
+#include <QDebug>
 CameraTexture::CameraTexture(int width, int height)
 	: mWidth(width), mHeight(height)
 {
+    qDebug()<<"CameraTexture::CameraTexture";
 	glGenTextures(1, &mTexture);
 	glBindTexture(GL_TEXTURE_2D, mTexture);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -15,11 +16,13 @@ CameraTexture::CameraTexture(int width, int height)
 
 CameraTexture::~CameraTexture()
 {
+    qDebug()<<"CameraTexture::~CameraTexture";
 	glDeleteTextures(1, &mTexture);
 }
 
 void CameraTexture::updateFrame(void *data)
 {
+    qDebug()<<"CameraTexture::updateFrame";
 	glBindTexture(GL_TEXTURE_2D, mTexture);
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, mWidth, mHeight, GL_RGB, GL_UNSIGNED_BYTE, data);
 	glBindTexture(GL_TEXTURE_2D, 0);

@@ -8,15 +8,15 @@ class ImageStream
 public:
     ImageStream(int width, int height);
     ~ImageStream();
-	uchar *getFrontImage() { return data[front_index]; }
-	uchar *getBackImage() { return data[(front_index + 1) % 2]; }
+    uchar *getFrontImage();
+    uchar *getBackImage();
     void swapImage();
-    bool isUpdated() { return updated; }
-    void decUpdated() { updated--; }
-    void lockFrontImage() { mutex.lock(); }
-    void unlockFrontImage() { mutex.unlock(); }
-    int getWidth() { return m_width; }
-    int getHeight() { return m_height; }
+    bool isUpdated();
+    void decUpdated();
+    void lockFrontImage();
+    void unlockFrontImage();
+    int getWidth();
+    int getHeight();
 
     void yuv2rgb(const uchar *yuv, int yw, int yh);
     void yuyv2rgb(const uchar *yuv, int yw, int yh);
